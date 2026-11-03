@@ -1,0 +1,7 @@
+id = "one-dark-pro-next"
+name = "One Dark Pro Next"
+version = "0.1.0"
+schema_version = 1
+authors = ["One Dark Pro Next contributors"]
+description = "One Dark Pro's syntax colors for Zed, generated from the VSCode extension's tokenColors"
+repository = "https://github.com/CHANGE-ME/one-dark-pro-next"

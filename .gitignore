@@ -1,0 +1,9 @@
+# editor / os
+.DS_Store
+Thumbs.db
+.vscode/
+.zed/
+
+# tooling
+node_modules/
+target/
