@@ -25,15 +25,18 @@ lookup. This document records what actually crosses over, measured against the i
 | `tokenColors` blocks / selectors in the source | 275 / 462 |
 | Selectors pinned to one language (32 ids) | 264 |
 | Selectors using a `source.*` / `meta.*` ancestor | 13 / 39 |
-| Zed `syntax` keys generated | 97 |
+| Zed `syntax` keys generated | 101 |
 | Capture names in bundled grammars that resolve to a key | 107 of 124 (85 exact) |
-| Keys that resolved to no VSCode rule → `editor.foreground` | 7 (`punctuation*`, `diff.delta`, `link_uri.markup`, `strikethrough.markup`) |
+| Keys that resolved to no VSCode rule → `editor.foreground` | 6 (`punctuation*`, `diff.delta`, `strikethrough.markup`) |
 | Formatting attributes in the source | italic 4 rules, underline 1, bold 0, background 0 |
 
 `scripts/gen-theme.mjs` is the authoritative mapping: its `SCOPES` table lists, per Zed capture, the
 TextMate scope stacks that feed it (most specific first). Colors are resolved with VSCode's own
 semantics — prefix matching per stack, then the matching rule chain folded from least to most
 specific (segment count, then source order), then the candidate whose winning rule is most specific.
+The one deliberate exception: `markup.*` captures are markdown-only in Zed, so their candidate lists
+use `.markdown`-qualified scopes (`entity.name.section.markdown`, `markup.inline.raw.markdown`) to
+avoid picking up a generic rule with a different color.
 
 ## What does not cross over
 
