@@ -28,8 +28,9 @@ const contrast = (a, b) => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 };
-// OKLab chroma: the axis "soft" is supposed to move (lower = less saturated).
-const chroma = (color) => {
+// OKLab coordinates of a colour, used for chroma (the axis softness moves) and for the
+// neighbour distance that decides whether Zed permutes the rainbow-bracket palette.
+const oklab = (color) => {
   const value = color.replace("#", "").slice(0, 6);
   const [r, g, b] = [0, 2, 4].map((i) => {
     const c = parseInt(value.slice(i, i + 2), 16) / 255;
@@ -38,9 +39,15 @@ const chroma = (color) => {
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
   const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
-  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
-  return Math.hypot(a, bb) * 100;
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+};
+const chroma = (color) => {
+  const [, a, b] = oklab(color);
+  return Math.hypot(a, b) * 100;
 };
 
 const errors = [];
@@ -90,6 +97,21 @@ if (theme) {
   console.log(
     `${theme.name}: min contrast ${Math.min(...ratios).toFixed(2)}:1, median ${median(ratios).toFixed(2)}:1, median chroma ${median(chromas).toFixed(1)}`,
   );
+
+  // Rainbow brackets: Zed reorders accents whose neighbours sit closer than 0.08 OKLab distance,
+  // which would silently change the depth→colour mapping, so hold the invariant here.
+  const accents = theme.style.accents ?? [];
+  if (accents.length < 3) errors.push(`accents: expected at least 3, found ${accents.length}`);
+  for (const color of accents) if (!hex.test(color)) errors.push(`accents: bad colour ${color}`);
+  let closest = { distance: Infinity, pair: "" };
+  for (let i = 0; i < accents.length; i += 1) {
+    const [a, b] = [oklab(accents[i]), oklab(accents[(i + 1) % accents.length])];
+    const distance = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    if (distance < closest.distance) closest = { distance, pair: `${accents[i]}/${accents[(i + 1) % accents.length]}` };
+  }
+  if (closest.distance < 0.08)
+    errors.push(`accents: ${closest.pair} too close (${closest.distance.toFixed(3)} < 0.08), Zed will reorder the palette`);
+  console.log(`accents: ${accents.length}, closest neighbours ${closest.distance.toFixed(3)} (${closest.pair})`);
 }
 if (errors.length) {
   console.error("\n" + errors.slice(0, 20).join("\n"));

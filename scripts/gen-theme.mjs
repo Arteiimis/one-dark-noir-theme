@@ -275,6 +275,14 @@ function variant(styles, factor) {
 // Chroma factor dialled in with _color-lab/soft-lab.html: lightness untouched, no grey mix.
 const SOFT_CHROMA = 0.85;
 
+// Rainbow brackets read `style.accents`. One Dark Pro's seven accents, chroma ×0.80, ordered by
+// greedy max-OKLab-distance so no neighbours sit closer than Zed's 0.08 reorder threshold —
+// otherwise Zed permutes the list itself and the depth order stops matching this file.
+const ACCENT_CHROMA = 0.8;
+const ACCENTS = ["#c678dd", "#98c379", "#e06c75", "#61afef", "#e5c07b", "#56b6c2", "#d19a66"].map(
+  (color) => scaleChroma(color, ACCENT_CHROMA),
+);
+
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
   name: "One Dark Pro Next",
@@ -283,7 +291,7 @@ const family = {
     {
       name: "One Dark Pro Next",
       appearance: "dark",
-      style: { ...base, syntax: variant(syntax, SOFT_CHROMA) },
+      style: { ...base, accents: ACCENTS, syntax: variant(syntax, SOFT_CHROMA) },
     },
   ],
 };
@@ -298,6 +306,7 @@ console.log(`rules       ${total} tokenColors, ${rules.length} selectors`);
 console.log(`syntax keys ${Object.keys(syntax).length} written to ${out}`);
 console.log(`variants    ${family.themes.map((theme) => theme.name).join(" | ")}`);
 console.log(`soft        chroma ×${SOFT_CHROMA}, comments frozen`);
+console.log(`accents     ${ACCENTS.length} for rainbow brackets (chroma ×${ACCENT_CHROMA})`);
 if (fallbacks.length)
   console.log(`fallback    ${fallbacks.length} (editor foreground): ${fallbacks.join(" ")}`);
 console.log(`used        ${usedRules.size}/${total} tokenColors reach at least one Zed key`);

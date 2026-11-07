@@ -694,7 +694,16 @@
             "font_style": null,
             "font_weight": null
           }
-        }
+        },
+        "accents": [
+          "#be81d1",
+          "#9ec086",
+          "#d3767c",
+          "#72aee1",
+          "#dfc18c",
+          "#6bb3bc",
+          "#c99d75"
+        ]
       }
     }
   ]

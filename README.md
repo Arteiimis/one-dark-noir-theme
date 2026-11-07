@@ -35,6 +35,8 @@ Zed extensions cannot register settings, so the theme ships exactly one palette:
 
 The factor is one number in `scripts/gen-theme.mjs` (`SOFT_CHROMA`); UI colors and backgrounds come from Zed's One Dark unchanged, so editing it never moves the layout.
 
+**Rainbow brackets** (`colorize_brackets`) take their colours from `style.accents`, not from `punctuation.bracket`. The theme ships One Dark Pro's seven accents with chroma ×0.80 (`ACCENT_CHROMA`), ordered by greedy max-distance so neighbouring colours stay ≥ 0.14 OKLab apart. Zed brightens accents below APCA 30 against the background and secretly permutes palettes whose neighbours are closer than 0.08 — the ordered list plus a `check-theme.mjs` guard keep the depth→colour mapping predictable. The same array also tints accent-colored UI (git graph, miniprofiler).
+
 Measured against `editor.background`: min / median WCAG contrast `3.74` / `5.90`:1, median OKLab chroma `9.4` (the untouched One Dark Pro palette scores `11.0`). `scripts/check-theme.mjs` fails if the comment grey moves, if a second theme appears, or if a built-in One Dark key loses its colour.
 
 ## Semantic tokens

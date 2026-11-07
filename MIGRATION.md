@@ -63,7 +63,11 @@ theme ships One Dark Pro's colours with their OKLab chroma multiplied by 0.85 â€
 untouched, the factor dialled in with `_color-lab`. `comment*` keys stay byte-identical to the
 source: scaling the comment grey either washes out the code or makes comments compete with it.
 This is a deliberate deviation from a pure port; `SOFT_CHROMA` in `scripts/gen-theme.mjs` is the
-only knob.
+only knob for syntax, `ACCENT_CHROMA` the one for rainbow brackets.
+
+`accents` is the one place where the port *adds* rather than maps: VSCode has no equivalent palette,
+so the seven accents are our own pick from One Dark Pro's syntax colours, chroma Ã—0.80, ordered to
+stay clear of Zed's 0.08 OKLab reorder threshold.
 
 ## Going finer than this theme
 
