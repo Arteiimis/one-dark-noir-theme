@@ -72,7 +72,9 @@ const SCOPES = {
   namespace: ["entity.name.namespace", "entity.name.scope-resolution"],
   number: ["constant.numeric"],
   "number.quantifier.regex": ["keyword.operator.quantifier.regexp", "keyword.operator"],
-  operator: ["keyword.operator.arithmetic", "keyword.operator.assignment", "keyword.operator"],
+  // One Dark Pro colours operators as body text (`keyword.operator` → #abb2bf); the
+  // arithmetic/assignment rules are cyan in the source theme, which reads louder than VSCode.
+  operator: ["keyword.operator"],
   "operator.regex": ["keyword.operator.regexp", "keyword.operator"],
   predictive: ["comment"],
   preproc: ["meta.preprocessor", "keyword.control.import"],
