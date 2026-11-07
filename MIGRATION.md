@@ -56,14 +56,14 @@ avoid picking up a generic rule with a different color.
    styles may never be emitted as a capture in Zed, and vice versa (`enum`, `variant`, `label`,
    `hint`, `predictive` are Zed-only concepts).
 
-## Contrast variants
+## Softened palette
 
-Zed has no contrast setting and a theme extension cannot add one, so the family ships two themes
-(`Next` / `Soft`). Non-comment colors in `Soft` get their OKLab chroma multiplied by 0.85, with
-lightness and hue untouched (the number was dialled in with `_color-lab`). `comment*` keys stay
-byte-identical in both — scaling the comment grey either washes out the code or makes comments
-compete with it. This is a deliberate deviation from a pure port: the source theme has no such
-variant.
+Zed has no contrast or saturation setting and a theme extension cannot add one, so the single
+theme ships One Dark Pro's colours with their OKLab chroma multiplied by 0.85 — lightness and hue
+untouched, the factor dialled in with `_color-lab`. `comment*` keys stay byte-identical to the
+source: scaling the comment grey either washes out the code or makes comments compete with it.
+This is a deliberate deviation from a pure port; `SOFT_CHROMA` in `scripts/gen-theme.mjs` is the
+only knob.
 
 ## Going finer than this theme
 

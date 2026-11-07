@@ -29,18 +29,13 @@ The script prints how many `tokenColors` blocks fed a key and which keys fell ba
 
 To ship another variant, add a second theme object to `themes/one-dark-pro-next.json` (or emit one file per variant — Zed picks up every `themes/*.json`).
 
-## Contrast variants
+## Softened palette
 
-Zed extensions cannot register settings, so the "soft" knob is a second theme — `theme selector: toggle` picks one, UI colors and backgrounds are identical in both:
+Zed extensions cannot register settings, so the theme ships exactly one palette: the migrated One Dark Pro colours with their OKLab chroma multiplied by **0.85** (hue and lightness untouched), while `comment*` keys are frozen at One Dark Pro's own grey `#7f848e`. Comments sit just above the background, so scaling them either washes the code out or makes them compete with it.
 
-| Theme | Non-comment syntax colors | Comments |
-| --- | --- | --- |
-| One Dark Pro Next | as migrated from VSCode | as migrated |
-| One Dark Pro Next Soft | OKLab chroma ×0.85, lightness untouched | unchanged |
+The factor is one number in `scripts/gen-theme.mjs` (`SOFT_CHROMA`); UI colors and backgrounds come from Zed's One Dark unchanged, so editing it never moves the layout.
 
-Comments are deliberately frozen in both themes (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling its chroma either washes the code out or makes comments compete with it. Everything else has its OKLab chroma scaled — the a/b axes, so hue and lightness stay put.
-
-Measured WCAG contrast of the syntax palette against `editor.background` (min / median), with median OKLab chroma: normal `3.73` / `5.92`:1 (C 11.0), soft `3.74` / `5.90`:1 (C 9.4). `scripts/check-theme.mjs` fails if the comment freeze drifts, if soft becomes less saturated than normal, if soft loses more than 5% contrast, or if a third theme reappears.
+Measured against `editor.background`: min / median WCAG contrast `3.74` / `5.90`:1, median OKLab chroma `9.4` (the untouched One Dark Pro palette scores `11.0`). `scripts/check-theme.mjs` fails if the comment grey moves, if a second theme appears, or if a built-in One Dark key loses its colour.
 
 ## Semantic tokens
 

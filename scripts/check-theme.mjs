@@ -68,44 +68,29 @@ for (const theme of family.themes ?? []) {
   console.log(`${theme.name}: ${Object.keys(syntax).length} syntax keys, ${Object.keys(style).length} style keys`);
 }
 
-// --- contrast variants --------------------------------------------------------
-const pick = (suffix) => family.themes.find((theme) => theme.name.endsWith(suffix));
-const normal = pick("Next");
-const soft = pick("Soft");
+// --- softened palette ---------------------------------------------------------
+// One Dark Pro's comment grey must come through untouched; everything else is the
+// generator's chroma pass, so this constant is the freeze marker.
+const COMMENT_GREY = "#7f848e";
+const theme = family.themes[0];
 
-if (family.themes.length !== 2) errors.push(`expected 2 themes (Next, Soft), found ${family.themes.length}`);
-if (!normal || !soft) errors.push("missing a variant (Next / Soft)");
-else {
-  const bg = normal.style["editor.background"];
-  for (const key of Object.keys(normal.style.syntax)) {
-    const colors = [normal.style.syntax[key]?.color, soft.style.syntax[key]?.color];
-    if (colors.some((color) => color === undefined)) {
-      errors.push(`${key}: missing from a variant`);
-      continue;
-    }
-    if (FROZEN.test(key)) {
-      if (colors[0] !== colors[1]) errors.push(`${key}: comments must not change (${colors.join(" ")})`);
-      continue;
-    }
-    const [normalRatio, softRatio] = colors.map((color) => contrast(color, bg));
-    // Soft is a saturation change, not a dimming: hold contrast close to normal instead of below it.
-    if (softRatio < normalRatio * 0.95)
-      errors.push(`${key}: soft lost contrast vs normal (${softRatio.toFixed(2)} vs ${normalRatio.toFixed(2)})`);
-    const [normalChroma, softChroma] = colors.map((color) => chroma(color));
-    if (softChroma > normalChroma + 0.001)
-      errors.push(`${key}: soft is not less saturated than normal (${softChroma.toFixed(1)} vs ${normalChroma.toFixed(1)})`);
+if (family.themes.length !== 1) errors.push(`expected 1 theme, found ${family.themes.length}`);
+if (theme) {
+  const bg = theme.style["editor.background"];
+  const syntax = theme.style.syntax;
+  for (const key of Object.keys(syntax)) {
+    if (!FROZEN.test(key)) continue;
+    if (syntax[key].color !== COMMENT_GREY)
+      errors.push(`${key}: comment colour moved (${syntax[key].color}, expected ${COMMENT_GREY})`);
   }
-  for (const theme of [normal, soft]) {
-    const entries = Object.entries(theme.style.syntax).filter(([key]) => !FROZEN.test(key));
-    const ratios = entries.map(([, value]) => contrast(value.color, bg));
-    const chromas = entries.map(([, value]) => chroma(value.color));
-    const median = (values) => [...values].sort((a, b) => a - b)[values.length >> 1];
-    console.log(
-      `${theme.name}: min contrast ${Math.min(...ratios).toFixed(2)}:1, median ${median(ratios).toFixed(2)}:1, median chroma ${median(chromas).toFixed(1)}`,
-    );
-  }
+  const entries = Object.entries(syntax).filter(([key]) => !FROZEN.test(key));
+  const ratios = entries.map(([, value]) => contrast(value.color, bg));
+  const chromas = entries.map(([, value]) => chroma(value.color));
+  const median = (values) => [...values].sort((a, b) => a - b)[values.length >> 1];
+  console.log(
+    `${theme.name}: min contrast ${Math.min(...ratios).toFixed(2)}:1, median ${median(ratios).toFixed(2)}:1, median chroma ${median(chromas).toFixed(1)}`,
+  );
 }
-
 if (errors.length) {
   console.error("\n" + errors.slice(0, 20).join("\n"));
   process.exit(1);

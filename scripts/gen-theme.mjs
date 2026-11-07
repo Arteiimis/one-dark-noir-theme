@@ -272,7 +272,7 @@ function variant(styles, factor) {
   return out;
 }
 
-// Dialled in with _color-lab/soft-lab.html: chroma 0.85, lightness untouched, no grey mix.
+// Chroma factor dialled in with _color-lab/soft-lab.html: lightness untouched, no grey mix.
 const SOFT_CHROMA = 0.85;
 
 const family = {
@@ -280,9 +280,8 @@ const family = {
   name: "One Dark Pro Next",
   author: "Migrated from One Dark Pro by zhuangtongfa / Binaryify",
   themes: [
-    { name: "One Dark Pro Next", appearance: "dark", style: { ...base, syntax } },
     {
-      name: "One Dark Pro Next Soft",
+      name: "One Dark Pro Next",
       appearance: "dark",
       style: { ...base, syntax: variant(syntax, SOFT_CHROMA) },
     },
@@ -298,6 +297,7 @@ console.log(`source      ${src}`);
 console.log(`rules       ${total} tokenColors, ${rules.length} selectors`);
 console.log(`syntax keys ${Object.keys(syntax).length} written to ${out}`);
 console.log(`variants    ${family.themes.map((theme) => theme.name).join(" | ")}`);
+console.log(`soft        chroma ×${SOFT_CHROMA}, comments frozen`);
 if (fallbacks.length)
   console.log(`fallback    ${fallbacks.length} (editor foreground): ${fallbacks.join(" ")}`);
 console.log(`used        ${usedRules.size}/${total} tokenColors reach at least one Zed key`);
