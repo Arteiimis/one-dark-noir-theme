@@ -69,6 +69,21 @@ only knob for syntax, `ACCENT_CHROMA` the one for rainbow brackets.
 so the seven accents are our own pick from One Dark Pro's syntax colours, chroma ×0.80, ordered to
 stay clear of Zed's 0.08 OKLab reorder threshold.
 
+## Known divergences from VSCode
+
+One Zed capture serves every language, so wherever VSCode resolves the same construct to different
+scopes per language, one of them loses:
+
+| capture | this theme | VSCode |
+| --- | --- | --- |
+| `type.builtin` | purple (`storage`) | C++/Rust `int`/`i32` purple (`storage.type.primitive.*` → `storage`); TS `string` yellow (`support.type.primitive.ts`); Python builtin types cyan (`support.type.python`) |
+| `function.special` | cyan (`support.function`) | Python magic methods cyan; C++ function-like macro names are `entity.name.function.preprocessor.cpp` → blue |
+| `auto` | yellow (Zed captures it as `@type`, shared with `type_identifier`) | purple (`storage.type`) |
+| `#pragma …` / `#undef …` arguments | plain foreground | whole line one color (`meta.preprocessor`) — Zed never captures `preproc_arg` for `preproc_call` |
+
+These were chosen by looking at the scope the target language actually emits in VSCode's TextMate
+grammars, not by trusting an unsuffixed selector that happens to exist upstream.
+
 ## Going finer than this theme
 
 - Per-capture tuning: add or change an entry in `SCOPES`, rerun the generator.
