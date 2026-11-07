@@ -88,8 +88,11 @@ else {
       continue;
     }
     const [softRatio, normalRatio, highRatio] = colors.map((color) => contrast(color, bg));
-    if (softRatio > normalRatio + 0.001 || normalRatio > highRatio + 0.001)
-      errors.push(`${key}: contrast not ordered soft/normal/high (${softRatio.toFixed(2)} ${normalRatio.toFixed(2)} ${highRatio.toFixed(2)})`);
+    // Soft is a saturation change, not a dimming: hold contrast close to normal instead of below it.
+    if (softRatio < normalRatio * 0.95)
+      errors.push(`${key}: soft lost contrast vs normal (${softRatio.toFixed(2)} vs ${normalRatio.toFixed(2)})`);
+    if (normalRatio > highRatio + 0.001)
+      errors.push(`${key}: high contrast is not brighter than normal (${normalRatio.toFixed(2)} vs ${highRatio.toFixed(2)})`);
     // Soft is the tier that desaturates; High only moves lightness, which can raise chroma a bit.
     const [softChroma, normalChroma] = [colors[0], colors[1]].map((color) => chroma(color));
     if (softChroma > normalChroma + 0.001)

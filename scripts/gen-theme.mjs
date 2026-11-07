@@ -275,8 +275,8 @@ function variant(styles, options) {
   return out;
 }
 
-// Dialled in with _color-lab/soft-lab.html: chroma 0.80, lightness -0.05, no grey mix.
-const SOFT = { chroma: 0.8, lightness: -0.05 };
+// Dialled in with _color-lab/soft-lab.html: chroma 0.85, no lightness shift, no grey mix.
+const SOFT = { chroma: 0.85, lightness: 0 };
 const HIGH = { chroma: 1, lightness: 0.4 };
 
 const family = {
