@@ -29,6 +29,20 @@ The script prints how many `tokenColors` blocks fed a key and which keys fell ba
 
 To ship another variant, add a second theme object to `themes/one-dark-pro-next.json` (or emit one file per variant — Zed picks up every `themes/*.json`).
 
+## Contrast variants
+
+Zed extensions cannot register settings, so the "contrast knob" is a theme family with three tiers — `theme selector: toggle` picks one, UI colors and backgrounds are identical in all three:
+
+| Theme | Non-comment syntax colors | Comments |
+| --- | --- | --- |
+| One Dark Pro Next | as migrated from VSCode | as migrated |
+| One Dark Pro Next Soft | OKLab lightness ×0.9 | unchanged |
+| One Dark Pro Next High Contrast | OKLab lightness +40% toward white | unchanged |
+
+Comments are deliberately frozen in every tier (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling it either washes the code out or makes comments compete with it. Everything else is scaled on the lightness axis only, chroma untouched, so hues stay put.
+
+Measured WCAG contrast of the syntax palette against `editor.background` (min / median): soft `2.90` / `4.50`:1, normal `3.73` / `5.92`:1, high `6.70` / `8.43`:1. `scripts/check-theme.mjs` fails if the ordering or the frozen comments ever drift.
+
 ## Semantic tokens
 
 VSCode's `semanticTokenColors` cannot be shipped by a Zed theme: Zed's equivalent lives in

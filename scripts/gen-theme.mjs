@@ -221,15 +221,74 @@ for (const key of Object.keys(SCOPES).sort()) {
   };
 }
 
+// --- contrast variants -------------------------------------------------------
+// Comments keep their One Dark color in every variant: the grey they use sits just above the
+// background, so scaling its lightness either washes the code out or makes comments shout.
+const FROZEN = /^comment(\.|$)/;
+
+const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const toSrgb = (c) => (c <= 0.0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - 0.055);
+
+function toOklab([r, g, b]) {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+function fromOklab([L, a, b]) {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const clamp = (c) => Math.min(1, Math.max(0, c));
+  return [
+    clamp(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    clamp(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    clamp(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  ];
+}
+
+// Scales lightness in OKLab (perceptually even, hue preserved).
+// 0 keeps the theme as generated, positive pushes colors toward white, negative toward black.
+function shiftLightness(color, amount) {
+  const value = color.replace("#", "");
+  const alpha = value.length === 8 ? value.slice(6) : "";
+  const rgb = [0, 2, 4].map((i) => toLinear(parseInt(value.slice(i, i + 2), 16) / 255));
+  const [L, a, b] = toOklab(rgb);
+  const shifted = L + (amount >= 0 ? (1 - L) * amount : L * amount);
+  const out = fromOklab([Math.min(1, Math.max(0, shifted)), a, b])
+    .map((c) => Math.round(toSrgb(c) * 255))
+    .map((n) => n.toString(16).padStart(2, "0"))
+    .join("");
+  return `#${out}${alpha}`;
+}
+
+function withContrast(styles, amount) {
+  const out = {};
+  for (const [key, style] of Object.entries(styles))
+    out[key] = FROZEN.test(key) ? style : { ...style, color: shiftLightness(style.color, amount) };
+  return out;
+}
+
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
   name: "One Dark Pro Next",
   author: "Migrated from One Dark Pro by zhuangtongfa / Binaryify",
   themes: [
+    { name: "One Dark Pro Next", appearance: "dark", style: { ...base, syntax } },
     {
-      name: "One Dark Pro Next",
+      name: "One Dark Pro Next Soft",
       appearance: "dark",
-      style: { ...base, syntax },
+      style: { ...base, syntax: withContrast(syntax, -0.1) },
+    },
+    {
+      name: "One Dark Pro Next High Contrast",
+      appearance: "dark",
+      style: { ...base, syntax: withContrast(syntax, 0.4) },
     },
   ],
 };
@@ -242,6 +301,7 @@ const total = vscode.tokenColors?.length ?? 0;
 console.log(`source      ${src}`);
 console.log(`rules       ${total} tokenColors, ${rules.length} selectors`);
 console.log(`syntax keys ${Object.keys(syntax).length} written to ${out}`);
+console.log(`variants    ${family.themes.map((theme) => theme.name).join(" | ")}`);
 if (fallbacks.length)
   console.log(`fallback    ${fallbacks.length} (editor foreground): ${fallbacks.join(" ")}`);
 console.log(`used        ${usedRules.size}/${total} tokenColors reach at least one Zed key`);

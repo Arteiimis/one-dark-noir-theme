@@ -56,6 +56,14 @@ avoid picking up a generic rule with a different color.
    styles may never be emitted as a capture in Zed, and vice versa (`enum`, `variant`, `label`,
    `hint`, `predictive` are Zed-only concepts).
 
+## Contrast variants
+
+Zed has no contrast setting and a theme extension cannot add one, so the family ships three tiers
+(`Next` / `Soft` / `High Contrast`). Non-comment colors get their OKLab lightness scaled
+(×0.9 / +40% toward white), chroma and hue untouched; `comment*` keys stay byte-identical in all
+three, because scaling the comment grey either washes out the code or makes comments compete with
+it. This is a deliberate deviation from a pure port — the source theme has no such tiers.
+
 ## Going finer than this theme
 
 - Per-capture tuning: add or change an entry in `SCOPES`, rerun the generator.
