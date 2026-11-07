@@ -221,6 +221,14 @@ for (const key of Object.keys(SCOPES).sort()) {
   };
 }
 
+// Captures Zed emits that One Dark Pro never styles, because no TextMate scope exists for them:
+// C++20 concept names. Coloured with the source theme's fountainBlue (the same cyan as builtin
+// functions) and italic, so a concept reads as a declaration rather than as a type.
+const EXPLICIT = {
+  concept: { color: "#56b6c2", font_style: "italic", font_weight: null },
+};
+Object.assign(syntax, EXPLICIT);
+
 // --- contrast variants -------------------------------------------------------
 // Comments keep their One Dark color in every variant: the grey they use sits just above the
 // background, so scaling its chroma or lightness either washes the code out or makes comments

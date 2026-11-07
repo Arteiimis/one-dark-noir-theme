@@ -80,6 +80,7 @@ scopes per language, one of them loses:
 | `function.special` | cyan (`support.function`) | Python magic methods cyan; C++ function-like macro names are `entity.name.function.preprocessor.cpp` → blue |
 | `auto` | yellow (Zed captures it as `@type`, shared with `type_identifier`) | purple (`storage.type`) |
 | `#pragma …` / `#undef …` arguments | plain foreground | whole line one color (`meta.preprocessor`) — Zed never captures `preproc_arg` for `preproc_call` |
+| `concept` | cyan + italic (`#56b6c2` before the soft pass) | no TextMate scope exists upstream, so nothing to copy; Neovim's clice plugin maps concepts to `@type` (yellow) |
 
 These were chosen by looking at the scope the target language actually emits in VSCode's TextMate
 grammars, not by trusting an unsuffixed selector that happens to exist upstream.

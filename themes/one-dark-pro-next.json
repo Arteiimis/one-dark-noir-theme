@@ -693,6 +693,11 @@
             "color": "#66b4be",
             "font_style": null,
             "font_weight": null
+          },
+          "concept": {
+            "color": "#66b4be",
+            "font_style": "italic",
+            "font_weight": null
           }
         },
         "accents": [
