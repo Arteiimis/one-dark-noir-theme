@@ -253,31 +253,27 @@ function fromOklab([L, a, b]) {
   ];
 }
 
-// Scales chroma and lightness in OKLab (perceptually even, hue preserved).
-// `chroma` multiplies the a/b axes (1 = untouched), `lightness` pushes L toward white (+) or black (-).
-function adjust(color, { chroma = 1, lightness = 0 }) {
+// Scales chroma in OKLab (perceptually even, hue and lightness preserved).
+function scaleChroma(color, factor) {
   const value = color.replace("#", "");
   const alpha = value.length === 8 ? value.slice(6) : "";
-  const rgb = [0, 2, 4].map((i) => toLinear(parseInt(value.slice(i, i + 2), 16) / 255));
-  const [L, a, b] = toOklab(rgb);
-  const shifted = L + (lightness >= 0 ? (1 - L) * lightness : L * lightness);
-  const out = fromOklab([Math.min(1, Math.max(0, shifted)), a * chroma, b * chroma])
+  const [L, a, b] = toOklab([0, 2, 4].map((i) => toLinear(parseInt(value.slice(i, i + 2), 16) / 255)));
+  const out = fromOklab([L, a * factor, b * factor])
     .map((c) => Math.round(toSrgb(c) * 255))
     .map((n) => n.toString(16).padStart(2, "0"))
     .join("");
   return `#${out}${alpha}`;
 }
 
-function variant(styles, options) {
+function variant(styles, factor) {
   const out = {};
   for (const [key, style] of Object.entries(styles))
-    out[key] = FROZEN.test(key) ? style : { ...style, color: adjust(style.color, options) };
+    out[key] = FROZEN.test(key) ? style : { ...style, color: scaleChroma(style.color, factor) };
   return out;
 }
 
-// Dialled in with _color-lab/soft-lab.html: chroma 0.85, no lightness shift, no grey mix.
-const SOFT = { chroma: 0.85, lightness: 0 };
-const HIGH = { chroma: 1, lightness: 0.4 };
+// Dialled in with _color-lab/soft-lab.html: chroma 0.85, lightness untouched, no grey mix.
+const SOFT_CHROMA = 0.85;
 
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
@@ -288,12 +284,7 @@ const family = {
     {
       name: "One Dark Pro Next Soft",
       appearance: "dark",
-      style: { ...base, syntax: variant(syntax, SOFT) },
-    },
-    {
-      name: "One Dark Pro Next High Contrast",
-      appearance: "dark",
-      style: { ...base, syntax: variant(syntax, HIGH) },
+      style: { ...base, syntax: variant(syntax, SOFT_CHROMA) },
     },
   ],
 };

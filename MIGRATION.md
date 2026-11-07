@@ -58,12 +58,12 @@ avoid picking up a generic rule with a different color.
 
 ## Contrast variants
 
-Zed has no contrast setting and a theme extension cannot add one, so the family ships three tiers
-(`Next` / `Soft` / `High Contrast`). Non-comment colors are adjusted in OKLab: `Soft` multiplies
-chroma by 0.85 and leaves lightness alone (the number was dialled in with `_color-lab`),
-`High Contrast` pushes lightness 40% toward white. `comment*` keys stay byte-identical in all
-three — scaling the comment grey either washes out the code or makes comments compete with it. This
-is a deliberate deviation from a pure port: the source theme has no such tiers.
+Zed has no contrast setting and a theme extension cannot add one, so the family ships two themes
+(`Next` / `Soft`). Non-comment colors in `Soft` get their OKLab chroma multiplied by 0.85, with
+lightness and hue untouched (the number was dialled in with `_color-lab`). `comment*` keys stay
+byte-identical in both — scaling the comment grey either washes out the code or makes comments
+compete with it. This is a deliberate deviation from a pure port: the source theme has no such
+variant.
 
 ## Going finer than this theme
 

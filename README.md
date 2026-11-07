@@ -31,17 +31,16 @@ To ship another variant, add a second theme object to `themes/one-dark-pro-next.
 
 ## Contrast variants
 
-Zed extensions cannot register settings, so the "contrast knob" is a theme family with three tiers — `theme selector: toggle` picks one, UI colors and backgrounds are identical in all three:
+Zed extensions cannot register settings, so the "soft" knob is a second theme — `theme selector: toggle` picks one, UI colors and backgrounds are identical in both:
 
 | Theme | Non-comment syntax colors | Comments |
 | --- | --- | --- |
 | One Dark Pro Next | as migrated from VSCode | as migrated |
 | One Dark Pro Next Soft | OKLab chroma ×0.85, lightness untouched | unchanged |
-| One Dark Pro Next High Contrast | OKLab lightness +40% toward white | unchanged |
 
-Comments are deliberately frozen in every tier (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling its chroma or lightness either washes the code out or makes comments compete with it. Everything else is scaled in OKLab — chroma multiplies the a/b axes (hue stays), lightness pushes L toward white or black.
+Comments are deliberately frozen in both themes (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling its chroma either washes the code out or makes comments compete with it. Everything else has its OKLab chroma scaled — the a/b axes, so hue and lightness stay put.
 
-Measured WCAG contrast of the syntax palette against `editor.background` (min / median), with median OKLab chroma: soft `3.74` / `5.90`:1 (C 9.4), normal `3.73` / `5.92`:1 (C 11.0), high `6.70` / `8.43`:1. `scripts/check-theme.mjs` fails if the comment freeze drifts, if soft becomes less saturated than normal, if soft loses more than 5% contrast, or if high is not brighter than normal.
+Measured WCAG contrast of the syntax palette against `editor.background` (min / median), with median OKLab chroma: normal `3.73` / `5.92`:1 (C 11.0), soft `3.74` / `5.90`:1 (C 9.4). `scripts/check-theme.mjs` fails if the comment freeze drifts, if soft becomes less saturated than normal, if soft loses more than 5% contrast, or if a third theme reappears.
 
 ## Semantic tokens
 

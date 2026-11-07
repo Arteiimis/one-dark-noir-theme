@@ -72,33 +72,30 @@ for (const theme of family.themes ?? []) {
 const pick = (suffix) => family.themes.find((theme) => theme.name.endsWith(suffix));
 const normal = pick("Next");
 const soft = pick("Soft");
-const high = pick("High Contrast");
 
-if (!normal || !soft || !high) errors.push("missing a contrast variant (Next / Soft / High Contrast)");
+if (family.themes.length !== 2) errors.push(`expected 2 themes (Next, Soft), found ${family.themes.length}`);
+if (!normal || !soft) errors.push("missing a variant (Next / Soft)");
 else {
   const bg = normal.style["editor.background"];
   for (const key of Object.keys(normal.style.syntax)) {
-    const colors = [soft, normal, high].map((theme) => theme.style.syntax[key]?.color);
+    const colors = [normal.style.syntax[key]?.color, soft.style.syntax[key]?.color];
     if (colors.some((color) => color === undefined)) {
       errors.push(`${key}: missing from a variant`);
       continue;
     }
     if (FROZEN.test(key)) {
-      if (new Set(colors).size !== 1) errors.push(`${key}: comments must not change (${colors.join(" ")})`);
+      if (colors[0] !== colors[1]) errors.push(`${key}: comments must not change (${colors.join(" ")})`);
       continue;
     }
-    const [softRatio, normalRatio, highRatio] = colors.map((color) => contrast(color, bg));
+    const [normalRatio, softRatio] = colors.map((color) => contrast(color, bg));
     // Soft is a saturation change, not a dimming: hold contrast close to normal instead of below it.
     if (softRatio < normalRatio * 0.95)
       errors.push(`${key}: soft lost contrast vs normal (${softRatio.toFixed(2)} vs ${normalRatio.toFixed(2)})`);
-    if (normalRatio > highRatio + 0.001)
-      errors.push(`${key}: high contrast is not brighter than normal (${normalRatio.toFixed(2)} vs ${highRatio.toFixed(2)})`);
-    // Soft is the tier that desaturates; High only moves lightness, which can raise chroma a bit.
-    const [softChroma, normalChroma] = [colors[0], colors[1]].map((color) => chroma(color));
+    const [normalChroma, softChroma] = colors.map((color) => chroma(color));
     if (softChroma > normalChroma + 0.001)
       errors.push(`${key}: soft is not less saturated than normal (${softChroma.toFixed(1)} vs ${normalChroma.toFixed(1)})`);
   }
-  for (const theme of [soft, normal, high]) {
+  for (const theme of [normal, soft]) {
     const entries = Object.entries(theme.style.syntax).filter(([key]) => !FROZEN.test(key));
     const ratios = entries.map(([, value]) => contrast(value.color, bg));
     const chromas = entries.map(([, value]) => chroma(value.color));
