@@ -223,7 +223,8 @@ for (const key of Object.keys(SCOPES).sort()) {
 
 // --- contrast variants -------------------------------------------------------
 // Comments keep their One Dark color in every variant: the grey they use sits just above the
-// background, so scaling its lightness either washes the code out or makes comments shout.
+// background, so scaling its chroma or lightness either washes the code out or makes comments
+// compete with it.
 const FROZEN = /^comment(\.|$)/;
 
 const toLinear = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
@@ -252,27 +253,31 @@ function fromOklab([L, a, b]) {
   ];
 }
 
-// Scales lightness in OKLab (perceptually even, hue preserved).
-// 0 keeps the theme as generated, positive pushes colors toward white, negative toward black.
-function shiftLightness(color, amount) {
+// Scales chroma and lightness in OKLab (perceptually even, hue preserved).
+// `chroma` multiplies the a/b axes (1 = untouched), `lightness` pushes L toward white (+) or black (-).
+function adjust(color, { chroma = 1, lightness = 0 }) {
   const value = color.replace("#", "");
   const alpha = value.length === 8 ? value.slice(6) : "";
   const rgb = [0, 2, 4].map((i) => toLinear(parseInt(value.slice(i, i + 2), 16) / 255));
   const [L, a, b] = toOklab(rgb);
-  const shifted = L + (amount >= 0 ? (1 - L) * amount : L * amount);
-  const out = fromOklab([Math.min(1, Math.max(0, shifted)), a, b])
+  const shifted = L + (lightness >= 0 ? (1 - L) * lightness : L * lightness);
+  const out = fromOklab([Math.min(1, Math.max(0, shifted)), a * chroma, b * chroma])
     .map((c) => Math.round(toSrgb(c) * 255))
     .map((n) => n.toString(16).padStart(2, "0"))
     .join("");
   return `#${out}${alpha}`;
 }
 
-function withContrast(styles, amount) {
+function variant(styles, options) {
   const out = {};
   for (const [key, style] of Object.entries(styles))
-    out[key] = FROZEN.test(key) ? style : { ...style, color: shiftLightness(style.color, amount) };
+    out[key] = FROZEN.test(key) ? style : { ...style, color: adjust(style.color, options) };
   return out;
 }
+
+// Dialled in with _color-lab/soft-lab.html: chroma 0.80, lightness -0.05, no grey mix.
+const SOFT = { chroma: 0.8, lightness: -0.05 };
+const HIGH = { chroma: 1, lightness: 0.4 };
 
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
@@ -283,12 +288,12 @@ const family = {
     {
       name: "One Dark Pro Next Soft",
       appearance: "dark",
-      style: { ...base, syntax: withContrast(syntax, -0.1) },
+      style: { ...base, syntax: variant(syntax, SOFT) },
     },
     {
       name: "One Dark Pro Next High Contrast",
       appearance: "dark",
-      style: { ...base, syntax: withContrast(syntax, 0.4) },
+      style: { ...base, syntax: variant(syntax, HIGH) },
     },
   ],
 };

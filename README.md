@@ -36,12 +36,12 @@ Zed extensions cannot register settings, so the "contrast knob" is a theme famil
 | Theme | Non-comment syntax colors | Comments |
 | --- | --- | --- |
 | One Dark Pro Next | as migrated from VSCode | as migrated |
-| One Dark Pro Next Soft | OKLab lightness ×0.9 | unchanged |
+| One Dark Pro Next Soft | OKLab chroma ×0.80, lightness −5% | unchanged |
 | One Dark Pro Next High Contrast | OKLab lightness +40% toward white | unchanged |
 
-Comments are deliberately frozen in every tier (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling it either washes the code out or makes comments compete with it. Everything else is scaled on the lightness axis only, chroma untouched, so hues stay put.
+Comments are deliberately frozen in every tier (`/^comment(\.|$)/` in `scripts/gen-theme.mjs`): their grey sits just above the background, so scaling its chroma or lightness either washes the code out or makes comments compete with it. Everything else is scaled in OKLab — chroma multiplies the a/b axes (hue stays), lightness pushes L toward white or black.
 
-Measured WCAG contrast of the syntax palette against `editor.background` (min / median): soft `2.90` / `4.50`:1, normal `3.73` / `5.92`:1, high `6.70` / `8.43`:1. `scripts/check-theme.mjs` fails if the ordering or the frozen comments ever drift.
+Measured WCAG contrast of the syntax palette against `editor.background` (min / median), with median OKLab chroma: soft `3.30` / `5.16`:1 (C 8.9), normal `3.73` / `5.92`:1 (C 11.0), high `6.70` / `8.43`:1. `scripts/check-theme.mjs` fails if the contrast ordering, the comment freeze, or "soft is less saturated than normal" ever drift.
 
 ## Semantic tokens
 

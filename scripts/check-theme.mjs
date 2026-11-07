@@ -28,6 +28,20 @@ const contrast = (a, b) => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 };
+// OKLab chroma: the axis "soft" is supposed to move (lower = less saturated).
+const chroma = (color) => {
+  const value = color.replace("#", "").slice(0, 6);
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(value.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s;
+  const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
+  return Math.hypot(a, bb) * 100;
+};
 
 const errors = [];
 const family = JSON.parse(readFileSync(join(root, "themes/one-dark-pro-next.json"), "utf8"));
@@ -76,12 +90,19 @@ else {
     const [softRatio, normalRatio, highRatio] = colors.map((color) => contrast(color, bg));
     if (softRatio > normalRatio + 0.001 || normalRatio > highRatio + 0.001)
       errors.push(`${key}: contrast not ordered soft/normal/high (${softRatio.toFixed(2)} ${normalRatio.toFixed(2)} ${highRatio.toFixed(2)})`);
+    // Soft is the tier that desaturates; High only moves lightness, which can raise chroma a bit.
+    const [softChroma, normalChroma] = [colors[0], colors[1]].map((color) => chroma(color));
+    if (softChroma > normalChroma + 0.001)
+      errors.push(`${key}: soft is not less saturated than normal (${softChroma.toFixed(1)} vs ${normalChroma.toFixed(1)})`);
   }
   for (const theme of [soft, normal, high]) {
-    const ratios = Object.entries(theme.style.syntax)
-      .filter(([key]) => !FROZEN.test(key))
-      .map(([, value]) => contrast(value.color, bg));
-    console.log(`${theme.name}: min contrast ${Math.min(...ratios).toFixed(2)}:1, median ${ratios.sort((a, b) => a - b)[ratios.length >> 1].toFixed(2)}:1`);
+    const entries = Object.entries(theme.style.syntax).filter(([key]) => !FROZEN.test(key));
+    const ratios = entries.map(([, value]) => contrast(value.color, bg));
+    const chromas = entries.map(([, value]) => chroma(value.color));
+    const median = (values) => [...values].sort((a, b) => a - b)[values.length >> 1];
+    console.log(
+      `${theme.name}: min contrast ${Math.min(...ratios).toFixed(2)}:1, median ${median(ratios).toFixed(2)}:1, median chroma ${median(chromas).toFixed(1)}`,
+    );
   }
 }
 
