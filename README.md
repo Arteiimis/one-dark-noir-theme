@@ -43,20 +43,31 @@ Measured against `editor.background`: min / median WCAG contrast `3.74` / `5.90`
 
 VSCode's `semanticTokenColors` cannot be shipped by a Zed theme: Zed's equivalent lives in
 settings (`global_lsp_settings.semantic_token_rules`) and points at capture names. Most entries
-already land correctly because the theme defines `variant`, `function.macro` and `variable.builtin`
-— the names Zed's default rules resolve to. Two overrides are worth pasting into `settings.json`:
+already land correctly because the theme defines `variant`, `function.macro`, `variable.builtin` and
+`constant.builtin` — the names Zed's default rules resolve to. Three overrides are worth pasting into
+`settings.json`: one for Go, whose predeclared types and constants are reported as LSP tokens that no
+default rule covers, and one for C++20 concepts, which have no TextMate scope to port.
 
 ```json
 {
   "semantic_tokens": "combined",
   "global_lsp_settings": {
     "semantic_token_rules": [
-      { "token_type": "variable", "token_modifiers": ["constant"], "foreground_color": "#d19a66" },
-      { "token_type": "memberOperatorOverload", "foreground_color": "#c678dd" }
+      // gopls sends string/bool/int as type + defaultLibrary; without this they fall back to `type`.
+      { "token_type": "type", "token_modifiers": ["defaultLibrary"], "style": ["type.builtin"] },
+      // clice reports concept names under its own `concept` kind; colour it like a builtin function.
+      { "token_type": "concept", "style": ["concept"] },
+      // gopls sends true/false/iota/nil as variable + readonly + defaultLibrary.
+      { "token_type": "variable", "token_modifiers": ["readonly", "defaultLibrary"], "style": ["constant.builtin"] }
     ]
   }
 }
 ```
+
+Rules match by required-modifier subset and are applied after Zed's defaults, so these only add
+coverage — with one visible side effect: `const` variables declared in C++ system headers (for
+example `std::numbers::pi_v<float>`) carry the same `readonly` + `defaultLibrary` pair and turn
+orange too.
 
 ## License
 
