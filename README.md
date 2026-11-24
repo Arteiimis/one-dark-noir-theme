@@ -17,13 +17,12 @@ Then select it: `zed: theme selector` → **One Dark Noir**.
 }
 ```
 
-Any color can be overridden without editing the theme file:
+Any key from `themes/one-dark-noir.json` can be overridden without editing the theme file — copy the entry you want to change into `theme_overrides`:
 
 ```json
 {
   "theme_overrides": {
     "One Dark Noir": {
-      "accents": ["#c678dd", "#98c379", "#e06c75", "#61afef", "#e5c07b", "#56b6c2", "#d19a66"],
       "syntax": {
         "comment": { "color": "#7f848e", "font_style": "italic" }
       }
@@ -32,7 +31,7 @@ Any color can be overridden without editing the theme file:
 }
 ```
 
-`accents` also drives rainbow brackets when `"colorize_brackets": true`, so overriding it changes both bracket colors and the accent-tinted UI.
+`accents` (seven colors) supplies the rainbow-bracket colors when `"colorize_brackets": true`, and the same colors tint accent-colored UI.
 
 ## License
 
