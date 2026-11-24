@@ -296,7 +296,7 @@ const ACCENTS = ["#c678dd", "#98c379", "#e06c75", "#61afef", "#e5c07b", "#56b6c2
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
   name: "One Dark Noir",
-  author: "Migrated from One Dark Pro by zhuangtongfa / Binaryify",
+  author: "Arteiimis",
   themes: [
     {
       name: "One Dark Noir",
