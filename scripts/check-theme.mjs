@@ -51,7 +51,7 @@ const chroma = (color) => {
 };
 
 const errors = [];
-const family = JSON.parse(readFileSync(join(root, "themes/one-dark-pro-next.json"), "utf8"));
+const family = JSON.parse(readFileSync(join(root, "themes/one-dark-noir.json"), "utf8"));
 if (!family.$schema) errors.push("missing $schema");
 if (!family.name || !family.author) errors.push("missing family name/author");
 if (!Array.isArray(family.themes) || !family.themes.length) errors.push("no themes");

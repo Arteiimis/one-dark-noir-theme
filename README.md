@@ -1,74 +1,39 @@
-# One Dark Pro Next
+# One Dark Noir
 
-A Zed theme extension that ports the **syntax colors** of the VSCode [One Dark Pro](https://github.com/Binaryify/OneDark-Pro) extension, generated from that extension's own `tokenColors` instead of being eyeballed.
+One Dark Pro's colors for Zed. The syntax palette is generated from the VS Code theme's `tokenColors` and mapped onto Zed's tree-sitter captures; the UI colors follow Zed's built-in One Dark, and the seven rainbow-bracket accents come from One Dark Pro's accent set.
 
-- Source theme: `zhuangtongfa.material-theme` 3.20.3, `themes/OneDark-Pro-mix.json`
-- Zed target: 1.26.x, theme schema [`v0.2.0`](https://zed.dev/schema/themes/v0.2.0.json)
-- UI colors: Zed's built-in **One Dark** (`scripts/zed-one-dark-base.json`), unchanged. Only `style.syntax` is generated.
+## Install
 
-What can and cannot move from VSCode to Zed is measured in [MIGRATION.md](./MIGRATION.md) — read that before treating this as a pixel-perfect port.
+- Marketplace: `zed: extensions` → **One Dark Noir** → **Install**.
+- From source: `zed: extensions` → **Install Dev Extension** → pick this repository.
 
-## Install (dev extension)
+Then select it: `zed: theme selector` → **One Dark Noir**.
 
-```sh
-# clone anywhere, then in Zed:
-#   command palette -> zed: install dev extension -> pick this directory
-#   command palette -> theme selector: toggle -> "One Dark Pro Next"
-```
-
-No Rust toolchain is needed: a theme extension is `extension.toml` + `themes/*.json`.
-
-## Regenerate after the source theme updates
-
-```sh
-node scripts/gen-theme.mjs                                   # installed One Dark Pro Mix
-node scripts/gen-theme.mjs path/to/OneDark-Pro-darker.json    # another variant
-```
-
-The script prints how many `tokenColors` blocks fed a key and which keys fell back to the editor foreground. `VERBOSE=1` prints, per Zed capture, the TextMate scope that supplied its color.
-
-To ship another variant, add a second theme object to `themes/one-dark-pro-next.json` (or emit one file per variant — Zed picks up every `themes/*.json`).
-
-## Softened palette
-
-Zed extensions cannot register settings, so the theme ships exactly one palette: the migrated One Dark Pro colours with their OKLab chroma multiplied by **0.85** (hue and lightness untouched), while `comment*` keys are frozen at One Dark Pro's own grey `#7f848e`. Comments sit just above the background, so scaling them either washes the code out or makes them compete with it.
-
-The factor is one number in `scripts/gen-theme.mjs` (`SOFT_CHROMA`); UI colors and backgrounds come from Zed's One Dark unchanged, so editing it never moves the layout.
-
-**Rainbow brackets** (`colorize_brackets`) take their colours from `style.accents`, not from `punctuation.bracket`. The theme ships One Dark Pro's seven accents with chroma ×0.80 (`ACCENT_CHROMA`), ordered by greedy max-distance so neighbouring colours stay ≥ 0.14 OKLab apart. Zed brightens accents below APCA 30 against the background and secretly permutes palettes whose neighbours are closer than 0.08 — the ordered list plus a `check-theme.mjs` guard keep the depth→colour mapping predictable. The same array also tints accent-colored UI (git graph, miniprofiler).
-
-Measured against `editor.background`: min / median WCAG contrast `3.74` / `5.90`:1, median OKLab chroma `9.4` (the untouched One Dark Pro palette scores `11.0`). `scripts/check-theme.mjs` fails if the comment grey moves, if a second theme appears, or if a built-in One Dark key loses its colour.
-
-## Semantic tokens
-
-VSCode's `semanticTokenColors` cannot be shipped by a Zed theme: Zed's equivalent lives in
-settings (`global_lsp_settings.semantic_token_rules`) and points at capture names. Most entries
-already land correctly because the theme defines `variant`, `function.macro`, `variable.builtin` and
-`constant.builtin` — the names Zed's default rules resolve to. Three overrides are worth pasting into
-`settings.json`: one for Go, whose predeclared types and constants are reported as LSP tokens that no
-default rule covers, and one for C++20 concepts, which have no TextMate scope to port.
+## Configuration
 
 ```json
 {
-  "semantic_tokens": "combined",
-  "global_lsp_settings": {
-    "semantic_token_rules": [
-      // gopls sends string/bool/int as type + defaultLibrary; without this they fall back to `type`.
-      { "token_type": "type", "token_modifiers": ["defaultLibrary"], "style": ["type.builtin"] },
-      // clice reports concept names under its own `concept` kind; colour it like a builtin function.
-      { "token_type": "concept", "style": ["concept"] },
-      // gopls sends true/false/iota/nil as variable + readonly + defaultLibrary.
-      { "token_type": "variable", "token_modifiers": ["readonly", "defaultLibrary"], "style": ["constant.builtin"] }
-    ]
+  "theme": "One Dark Noir"
+}
+```
+
+Any color can be overridden without editing the theme file:
+
+```json
+{
+  "theme_overrides": {
+    "One Dark Noir": {
+      "accents": ["#c678dd", "#98c379", "#e06c75", "#61afef", "#e5c07b", "#56b6c2", "#d19a66"],
+      "syntax": {
+        "comment": { "color": "#7f848e", "font_style": "italic" }
+      }
+    }
   }
 }
 ```
 
-Rules match by required-modifier subset and are applied after Zed's defaults, so these only add
-coverage — with one visible side effect: `const` variables declared in C++ system headers (for
-example `std::numbers::pi_v<float>`) carry the same `readonly` + `defaultLibrary` pair and turn
-orange too.
+`accents` also drives rainbow brackets when `"colorize_brackets": true`, so overriding it changes both bracket colors and the accent-tinted UI.
 
 ## License
 
-MIT, same as One Dark Pro. See [LICENSE](./LICENSE).
+MIT; syntax colors derived from [One Dark Pro](https://github.com/Binaryify/OneDark-Pro) by Binaryify.

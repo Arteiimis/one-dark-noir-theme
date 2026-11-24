@@ -295,18 +295,18 @@ const ACCENTS = ["#c678dd", "#98c379", "#e06c75", "#61afef", "#e5c07b", "#56b6c2
 
 const family = {
   $schema: "https://zed.dev/schema/themes/v0.2.0.json",
-  name: "One Dark Pro Next",
+  name: "One Dark Noir",
   author: "Migrated from One Dark Pro by zhuangtongfa / Binaryify",
   themes: [
     {
-      name: "One Dark Pro Next",
+      name: "One Dark Noir",
       appearance: "dark",
       style: { ...base, accents: ACCENTS, syntax: variant(syntax, SOFT_CHROMA) },
     },
   ],
 };
 
-const out = join(root, "themes/one-dark-pro-next.json");
+const out = join(root, "themes/one-dark-noir.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, JSON.stringify(family, null, 2) + "\n");
 
